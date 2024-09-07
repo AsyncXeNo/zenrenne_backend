@@ -23,7 +23,7 @@ from django.utils.html import format_html
 # Register your models here.
 @admin.register(Make)
 class MakeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'icon')
+    list_display = ('name',)
     list_display_links = ('name',)
 
 
@@ -68,8 +68,8 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductMakeModelConnection)
 class ProductMakeModelConnectionAdmin(admin.ModelAdmin):
     form = ProductMakeModelConnectionForm
-    list_display = ('product', 'parent')
-    list_display_links = ('product', 'parent')
+    list_display = ('id', 'product_link', 'parent')
+    list_display_links = ('id', 'product_link', 'parent')
     list_filter = ('parent_type',)
 
     fieldsets = (
@@ -98,6 +98,14 @@ class ProductMakeModelConnectionAdmin(admin.ModelAdmin):
     
     parent.short_description = 'Parent'
 
+    def product_link(self, obj):
+        if obj.product:
+            url = reverse('admin:api_product_change', args=[obj.product.id])
+            return format_html('<a href="{}">{}</a>', url, obj.product)
+        return "-"
+    
+    product_link.short_description = 'Product'
+
 
 @admin.register(Variant)
 class VariantAdmin(admin.ModelAdmin):
@@ -121,7 +129,7 @@ class VariantAdmin(admin.ModelAdmin):
 @admin.register(VariantImage)
 class VariantImageAdmin(admin.ModelAdmin):
     form = VariantImageAdminForm
-    list_display = ('id', 'image', 'variant_link')
+    list_display = ('id', 'image', 'variant_link', 'is_main')
     list_display_links = ('id', 'image')
 
     def variant_link(self, obj):

@@ -1,9 +1,11 @@
 from django.urls import path
 from .views import (
     MakeListAPIView,
+    MakesByProductView,
     ModelListAPIView,
     CarModelByMakeView,
     CarModelByModelView,
+    ModelsByProductView,
     ProductListView,
     ProductsByMakeView,
     ProductsByModelView,
@@ -21,10 +23,12 @@ from .views import (
 
 urlpatterns = [
     path('makes/', MakeListAPIView.as_view(), name='make-list'),
+    path('makes/product/<int:product_id>/', MakesByProductView.as_view(), name='makes-by-product'),
 
     path('models/', ModelListAPIView.as_view(), name='model-list'),
     path('models/make/<int:make_id>/', CarModelByMakeView.as_view(), name='carmodel-by-make'),
     path('models/model/<int:model_id>/', CarModelByModelView.as_view(), name='carmodel-by-model'),
+    path('models/product/<int:product_id>/', ModelsByProductView.as_view(), name='models-by-product'),
 
     path('products/', ProductListView.as_view(), name='product-list'),
     path('products/make/<int:make_id>/', ProductsByMakeView.as_view(), name='products-by-make'),

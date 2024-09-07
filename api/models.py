@@ -4,12 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.core.files.storage import default_storage
 
 
 # Create your models here.
 class Make(models.Model):
-    icon = models.FileField(upload_to='icons/')
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=30, unique=True)
 
     def __str__(self):
         return self.name
@@ -17,12 +17,6 @@ class Make(models.Model):
     class Meta:
         verbose_name = "Make"
         verbose_name_plural = "Makes"
-    
-
-@receiver(post_delete, sender=Make)
-def delete_make_icon_file(sender, instance, **kwargs):
-    if instance.icon and os.path.isfile(instance.icon.path):
-        os.remove(instance.icon.path)
 
 
 class CarModel(models.Model):
@@ -74,15 +68,22 @@ class Variant(models.Model):
 class VariantImage(models.Model):
     image = models.ImageField(upload_to='variant_images/')
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name='images')
+    is_main = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Image for {self.variant.name}"
+    
+    def save(self, *args, **kwargs):
+        if self.is_main:
+            # Set other images of the same variant to not be the main image
+            VariantImage.objects.filter(variant=self.variant, is_main=True).update(is_main=False)
+        super().save(*args, **kwargs)
 
 
 @receiver(post_delete, sender=VariantImage)
 def delete_variant_image_file(sender, instance, **kwargs):
-    if instance.image and os.path.isfile(instance.image.path):
-        os.remove(instance.image.path)
+    if instance.image:
+        default_storage.delete(instance.image.name)
 
 
 class Stat(models.Model):
@@ -96,6 +97,15 @@ class Stat(models.Model):
     def __str__(self):
         return f"Stat for {self.variant}, {self.name}"
     
+    def save(self, *args, **kwargs):
+        if self.variant.stats.count() >= 3:
+            raise ValueError("A variant can only have 3 stats.")
+        super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['variant', 'name'], name='unique_stat_name_per_variant')
+        ]
 
 
 class AudioTrack(models.Model):
@@ -107,8 +117,21 @@ class AudioTrack(models.Model):
     def __str__(self):
         return f"Audio Track for {self.variant}, {self.name}"
     
+    def save(self, *args, **kwargs):
+        # Enforce the limit of 3 audio tracks per variant
+        if self.variant.audio_tracks.count() >= 3 and not self.pk:
+            raise ValueError("A variant can only have 3 audio tracks.")
+
+        # Proceed with saving the model
+        super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['variant', 'name'], name='unique_audio_track_name_per_variant')
+        ]
+    
 
 @receiver(post_delete, sender=AudioTrack)
 def delete_audio_file(sender, instance, **kwargs):
-    if instance.track and os.path.isfile(instance.track.path):
-        os.remove(instance.track.path)
+    if instance.track:
+        default_storage.delete(instance.track.name)

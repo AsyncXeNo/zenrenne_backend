@@ -146,7 +146,7 @@ class VariantImageAdminForm(forms.ModelForm):
     
     class Meta:
         model = VariantImage
-        fields = ['image', 'variant']
+        fields = ['image', 'variant', 'is_main']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

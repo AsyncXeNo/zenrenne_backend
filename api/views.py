@@ -29,6 +29,32 @@ class MakeListAPIView(generics.ListAPIView):
     serializer_class = MakeSerializer
 
 
+class MakesByProductView(generics.GenericAPIView):
+    serializer_class = MakeSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs.get('product_id')
+        if not product_id:
+            return Make.objects.none()  # Return empty queryset if no Product ID is provided
+
+        # Get the Make IDs associated with the given Product ID
+        make_ids = ProductMakeModelConnection.objects.filter(
+            product_id=product_id,
+            parent_type=ContentType.objects.get_for_model(Make)
+        ).values_list('parent_id', flat=True)
+
+        # Return the Makes based on those IDs
+        return Make.objects.filter(id__in=make_ids)
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            raise NotFound(detail="Makes not found for the given Product ID")
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class ModelListAPIView(generics.ListAPIView):
     queryset = CarModel.objects.all()
     serializer_class = ModelSerializer
@@ -76,6 +102,32 @@ class CarModelByModelView(generics.GenericAPIView):
         if not queryset.exists():
             raise NotFound(detail="CarModels not found for the given Model ID")
         
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class ModelsByProductView(generics.GenericAPIView):
+    serializer_class = ModelSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs.get('product_id')
+        if not product_id:
+            return CarModel.objects.none()  # Return empty queryset if no Product ID is provided
+
+        # Get the CarModel IDs associated with the given Product ID
+        carmodel_ids = ProductMakeModelConnection.objects.filter(
+            product_id=product_id,
+            parent_type=ContentType.objects.get_for_model(CarModel)
+        ).values_list('parent_id', flat=True)
+
+        # Return the CarModels based on those IDs
+        return CarModel.objects.filter(id__in=carmodel_ids)
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            raise NotFound(detail="CarModels not found for the given Product ID")
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
