@@ -56,7 +56,7 @@ class ProductMakeModelConnectionSerializer(serializers.ModelSerializer):
 class VariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variant
-        fields = ['id', 'name', 'description', 'product']
+        fields = ['id', 'name', 'product_name', 'description', 'product']
 
 
 class VariantImageSerializer(serializers.ModelSerializer):

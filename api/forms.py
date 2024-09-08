@@ -22,7 +22,7 @@ class VariantForm(forms.ModelForm):
 
     class Meta:
         model = Variant
-        fields = ['name', 'description', 'product']
+        fields = ['name', 'product_name', 'description', 'product']
 
 
 class CarModelForm(forms.ModelForm):

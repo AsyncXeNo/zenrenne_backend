@@ -33,10 +33,12 @@ class CarModel(models.Model):
         verbose_name = "Model"
         verbose_name_plural = "Models"
 
+        unique_together = ('name', 'parent_type', 'parent_id')
+
 
 class Product(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
@@ -58,6 +60,7 @@ class ProductMakeModelConnection(models.Model):
 class Variant(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
+    product_name = models.CharField(max_length=200)
     description = models.TextField(max_length=3000)  # Store description as plain text
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
 

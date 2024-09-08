@@ -110,11 +110,11 @@ class ProductMakeModelConnectionAdmin(admin.ModelAdmin):
 @admin.register(Variant)
 class VariantAdmin(admin.ModelAdmin):
     form = VariantForm
-    list_display = ('name', 'product_link')
-    list_display_links = ('name',)
+    list_display = ('name', 'product_name', 'product_link')
+    list_display_links = ('name', 'product_name')
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'product')
+            'fields': ('name', 'product_name', 'description', 'product')
         }),
     )
 
