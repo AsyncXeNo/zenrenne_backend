@@ -59,7 +59,10 @@ MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+if not DEBUG:
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+else:
+    STATIC_URL = '/static/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -83,8 +86,9 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'storages',
-    
 ]
+
+INSTALLED_APPS += ['dal', 'dal_select2']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -168,3 +172,45 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        # 'handlers': {
+        #     'console': {
+        #         'level': 'ERROR',  # Set to 'ERROR' if you only want to see error-level logs in development
+        #         'class': 'logging.StreamHandler',
+        #     },
+        # },
+        'loggers': {
+            'django.db.backends': {
+                'level': 'DEBUG',  # Log SQL queries in development
+                'handlers': ['console'],
+            },
+            'django': {
+                'level': 'DEBUG',  # Log general Django-related events
+                'handlers': ['console'],
+                'propagate': True,
+            },
+        },
+    }
+    LOGGING = {}
+else:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+    }
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,  # Always show toolbar in development
+    }
+
+# Only allow Debug Toolbar for internal IPs (localhost/127.0.0.1)
+INTERNAL_IPS = [
+    '127.0.0.1',
+]

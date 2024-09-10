@@ -1,3 +1,9 @@
+data
+clean.py
+variant_image_folders.xlsx
+variants.txt
+zenrenne_product_data.xlsx
+
 # Django specific #
 *.log
 *.pot

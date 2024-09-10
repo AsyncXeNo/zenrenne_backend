@@ -7,7 +7,6 @@ from django.dispatch import receiver
 from django.core.files.storage import default_storage
 
 
-# Create your models here.
 class Make(models.Model):
     name = models.CharField(max_length=30, unique=True)
 
@@ -32,8 +31,8 @@ class CarModel(models.Model):
     class Meta:
         verbose_name = "Model"
         verbose_name_plural = "Models"
-
         unique_together = ('name', 'parent_type', 'parent_id')
+        indexes = [models.Index(fields=['parent_id', 'parent_type'])]  # Add index
 
 
 class Product(models.Model):
@@ -42,7 +41,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class ProductMakeModelConnection(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -50,23 +49,24 @@ class ProductMakeModelConnection(models.Model):
     parent_id = models.PositiveIntegerField()
     parent = GenericForeignKey('parent_type', 'parent_id')
 
-    class Meta:
-        unique_together = ('product', 'parent_type', 'parent_id')
-
     def __str__(self):
         return f"Product {self.product.id} -> {self.parent}"
-    
+
+    class Meta:
+        unique_together = ('product', 'parent_type', 'parent_id')
+        indexes = [models.Index(fields=['parent_id', 'parent_type'])]  # Add index
+
 
 class Variant(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     product_name = models.CharField(max_length=200)
-    description = models.TextField(max_length=3000)  # Store description as plain text
+    description = models.TextField(max_length=3000)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
 
     def __str__(self):
         return self.name
-    
+
 
 class VariantImage(models.Model):
     image = models.ImageField(upload_to='variant_images/')
@@ -99,7 +99,7 @@ class Stat(models.Model):
 
     def __str__(self):
         return f"Stat for {self.variant}, {self.name}"
-    
+
     def save(self, *args, **kwargs):
         if self.variant.stats.count() >= 3:
             raise ValueError("A variant can only have 3 stats.")
@@ -119,20 +119,17 @@ class AudioTrack(models.Model):
 
     def __str__(self):
         return f"Audio Track for {self.variant}, {self.name}"
-    
+
     def save(self, *args, **kwargs):
-        # Enforce the limit of 3 audio tracks per variant
         if self.variant.audio_tracks.count() >= 3 and not self.pk:
             raise ValueError("A variant can only have 3 audio tracks.")
-
-        # Proceed with saving the model
         super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['variant', 'name'], name='unique_audio_track_name_per_variant')
         ]
-    
+
 
 @receiver(post_delete, sender=AudioTrack)
 def delete_audio_file(sender, instance, **kwargs):

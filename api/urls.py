@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    ContentTypeListAPIView,
     MakeListAPIView,
     MakesByProductView,
     ModelListAPIView,
@@ -13,7 +14,7 @@ from .views import (
     VariantListView,
     VariantDetailView,
     VariantImageListView,
-    VariantImagesByProductView,
+    VariantImagesByVariantView,
     StatListAPIView,
     StatByVariantAPIView,
     AudioTrackListAPIView,
@@ -22,6 +23,8 @@ from .views import (
 
 
 urlpatterns = [
+    path('contenttypes/', ContentTypeListAPIView.as_view(), name='contenttype-list'),
+
     path('makes/', MakeListAPIView.as_view(), name='make-list'),
     path('makes/product/<int:product_id>/', MakesByProductView.as_view(), name='makes-by-product'),
 
@@ -41,7 +44,7 @@ urlpatterns = [
     path('variants/product/<int:product_id>', VariantListView.as_view(), name='variants-by-product'),
 
     path('variantimages/', VariantImageListView.as_view(), name='variant-image-list'),
-    path('variantimages/product/<int:product_id>', VariantImagesByProductView.as_view(), name='variant-images-by-product'),
+    path('variantimages/variant/<int:variant_id>', VariantImagesByVariantView.as_view(), name='variant-images-by-variant'),
 
     path('stats/', StatListAPIView.as_view(), name='stat-list'),
     path('stats/variant/<int:variant_id>/', StatByVariantAPIView.as_view(), name='stats-by-variant'),
