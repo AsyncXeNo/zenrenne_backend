@@ -1,4 +1,4 @@
-import time
+from django.db.models import Exists, OuterRef
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
@@ -212,6 +212,19 @@ class ProductsByModelView(generics.GenericAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+# Products with at least one variant and at least one image associated with a variant
+@method_decorator(cache_page(CACHE_TIME), name='dispatch')
+class ProductsWithVariantImageView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        # Check if a product has at least one variant with at least one image
+        variant_with_image_qs = VariantImage.objects.filter(variant=OuterRef('id'))
+        variants_with_images = Variant.objects.filter(product_id=OuterRef('pk')).filter(Exists(variant_with_image_qs))
+        
+        # Filter products that have variants with images
+        return Product.objects.filter(Exists(variants_with_images))
+
 # Variant List View
 @method_decorator(cache_page(CACHE_TIME), name='dispatch')
 class VariantListView(generics.ListAPIView):
@@ -229,6 +242,23 @@ class VariantListView(generics.ListAPIView):
 class VariantDetailView(generics.RetrieveAPIView):
     queryset = Variant.objects.all()
     serializer_class = VariantSerializer
+
+# Variants by product ID that have at least one image
+@method_decorator(cache_page(CACHE_TIME), name='dispatch')
+class VariantsWithImageByProductView(generics.ListAPIView):
+    serializer_class = VariantSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs.get('product_id')
+        
+        if not product_id:
+            return Variant.objects.none()
+        
+        # Query to find variants with at least one image
+        variant_with_image_qs = VariantImage.objects.filter(variant=OuterRef('id'))
+        
+        # Filter variants that belong to the specified product and have images
+        return Variant.objects.filter(product_id=product_id).filter(Exists(variant_with_image_qs))
 
 # Variant Image List View
 @method_decorator(cache_page(CACHE_TIME), name='dispatch')

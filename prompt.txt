@@ -1,3 +1,26 @@
+I have a front-end application. The application is incomplete, but here are the URLs for the different pages:
+
+
+https://zenrenneautowerke.com.au/
+https://zenrenneautowerke.com.au/product
+https://zenrenneautowerke.com.au/dealer-form
+https://zenrenneautowerke.com.au/dealers
+https://zenrenneautowerke.com.au/legal
+
+
+
+This is written using next.js, javascript and tailwindcss.
+
+
+
+I also have a backend api written using django rest framework, connecting to a postgress database and using S3 for media storage.
+
+
+
+I have the api url paths here:
+
+
+
 from django.urls import path
 from .views import (
     ContentTypeListAPIView,
@@ -11,10 +34,8 @@ from .views import (
     ProductsByMakeView,
     ProductsByModelView,
     ProductMakeModelConnectionListView,
-    ProductsWithVariantImageView,
     VariantListView,
     VariantDetailView,
-    VariantsWithImageByProductView,
     VariantImageListView,
     VariantImagesByVariantView,
     StatListAPIView,
@@ -38,14 +59,12 @@ urlpatterns = [
     path('products/', ProductListView.as_view(), name='product-list'),
     path('products/make/<int:make_id>/', ProductsByMakeView.as_view(), name='products-by-make'),
     path('products/model/<int:model_id>/', ProductsByModelView.as_view(), name='products-by-model'),
-    path('products/with-variant-image/', ProductsWithVariantImageView.as_view(), name='products-with-variant-image'),
 
     path('productconnections/', ProductMakeModelConnectionListView.as_view(), name='product-connection-list'),
 
     path('variants/', VariantListView.as_view(), name='variant-list'),
     path('variants/<int:pk>/', VariantDetailView.as_view(), name='variant-detail'),
     path('variants/product/<int:product_id>', VariantListView.as_view(), name='variants-by-product'),
-    path('variants/product/<int:product_id>/with-image/', VariantsWithImageByProductView.as_view(), name='variants-with-image-by-product'),
 
     path('variantimages/', VariantImageListView.as_view(), name='variant-image-list'),
     path('variantimages/variant/<int:variant_id>', VariantImagesByVariantView.as_view(), name='variant-images-by-variant'),
@@ -56,3 +75,22 @@ urlpatterns = [
     path('audiotracks/', AudioTrackListAPIView.as_view(), name='audiotrack-list'),
     path('audiotracks/variant/<int:variant_id>/', AudioTrackByVariantAPIView.as_view(), name='audiotracks-by-variant'),
 ]
+
+
+
+Example of the full urls:
+
+
+https://zenrenne-backend.onrender.com/api/makes
+https://zenrenne-backend.onrender.com/api/products/
+
+
+
+The task is the following:
+
+I want to add a page in my front-end application. This page will be for browsing products. The navigation will be using a dropdown, first level displays all the make, if we hover on a make it displays all the models for that particular make, if we hover over the model it displays all submodels (if any) and so on until we reach a model which does not have anymore submodels. The user can select at any point in this dropdown. So, he can select a make, or a model, or a sub-model.
+
+If nothing is selected, we show all of our products on the page.
+If something is selected, we filter the products by the selection.
+
+Now, on the product page itself, I want to:
