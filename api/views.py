@@ -13,7 +13,8 @@ from .models import (
     Variant, 
     VariantImage,
     Stat,
-    AudioTrack
+    AudioTrack,
+    NewsletterSubscriber
 )
 from .serializers import (
     ContentTypeSerializer,
@@ -24,7 +25,8 @@ from .serializers import (
     VariantSerializer, 
     VariantImageSerializer,
     StatSerializer,
-    AudioTrackSerializer
+    AudioTrackSerializer,
+    NewsletterSubscriberSerializer
 )
 from django.contrib.contenttypes.models import ContentType
 
@@ -307,3 +309,39 @@ class AudioTrackByVariantAPIView(generics.ListAPIView):
     def get_queryset(self):
         variant_id = self.kwargs['variant_id']
         return AudioTrack.objects.filter(variant_id=variant_id).select_related('variant')
+
+
+@method_decorator(cache_page(CACHE_TIME), name='dispatch')
+class NewsletterSubscribeView(generics.CreateAPIView):
+    queryset = NewsletterSubscriber.objects.all()
+    serializer_class = NewsletterSubscriberSerializer
+
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        
+        # Check if the subscriber already exists
+        subscriber, created = NewsletterSubscriber.objects.get_or_create(email=email)
+
+        if not created:  # If the subscriber already exists, just update unsubscribed to False
+            subscriber.unsubscribed = False
+            subscriber.save()
+            return Response({"message": "Subscriber already exists. Re-subscribed successfully."}, status=200)
+        
+        # If new subscriber, create normally
+        serializer = self.get_serializer(subscriber)
+        return Response(serializer.data, status=201)
+
+# Unsubscribe a user
+@method_decorator(cache_page(CACHE_TIME), name='dispatch')
+class NewsletterUnsubscribeView(generics.GenericAPIView):
+    serializer_class = NewsletterSubscriberSerializer
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        try:
+            subscriber = NewsletterSubscriber.objects.get(email=email)
+            subscriber.unsubscribed = True
+            subscriber.save()
+            return Response({"message": "Successfully unsubscribed."}, status=200)
+        except NewsletterSubscriber.DoesNotExist:
+            raise NotFound(detail="Subscriber not found.")

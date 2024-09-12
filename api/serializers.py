@@ -7,7 +7,8 @@ from .models import (
     Variant, 
     VariantImage,
     Stat,
-    AudioTrack
+    AudioTrack,
+    NewsletterSubscriber
 )
 from django.contrib.contenttypes.models import ContentType
 
@@ -83,3 +84,9 @@ class AudioTrackSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Audio track names must be unique within the same variant.")
 
         return data
+
+
+class NewsletterSubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscriber
+        fields = ['id', 'email', 'subscribed_at', 'unsubscribed']

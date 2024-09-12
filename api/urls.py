@@ -20,7 +20,9 @@ from .views import (
     StatListAPIView,
     StatByVariantAPIView,
     AudioTrackListAPIView,
-    AudioTrackByVariantAPIView
+    AudioTrackByVariantAPIView,
+    NewsletterSubscribeView,
+    NewsletterUnsubscribeView
 )
 
 
@@ -55,4 +57,8 @@ urlpatterns = [
 
     path('audiotracks/', AudioTrackListAPIView.as_view(), name='audiotrack-list'),
     path('audiotracks/variant/<int:variant_id>/', AudioTrackByVariantAPIView.as_view(), name='audiotracks-by-variant'),
+
+    path('subscribe/', NewsletterSubscribeView.as_view(), name='newsletter-subscribe'),
+    path('unsubscribe/', NewsletterUnsubscribeView.as_view(), name='newsletter-unsubscribe'),
+    
 ]

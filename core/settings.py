@@ -185,12 +185,12 @@ if DEBUG:
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
-        # 'handlers': {
-        #     'console': {
-        #         'level': 'ERROR',  # Set to 'ERROR' if you only want to see error-level logs in development
-        #         'class': 'logging.StreamHandler',
-        #     },
-        # },
+        'handlers': {
+            'console': {
+                'level': 'ERROR',  # Set to 'ERROR' if you only want to see error-level logs in development
+                'class': 'logging.StreamHandler',
+            },
+        },
         'loggers': {
             'django.db.backends': {
                 'level': 'DEBUG',  # Log SQL queries in development
