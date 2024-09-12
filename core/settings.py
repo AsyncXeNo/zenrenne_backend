@@ -175,6 +175,12 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True  # Allows all domains to make requests
+
+# Optionally, other CORS settings can be added
+CORS_ALLOW_CREDENTIALS = True  # If you want to allow cookies or HTTP authentication
+
 if DEBUG:
     LOGGING = {
         'version': 1,
