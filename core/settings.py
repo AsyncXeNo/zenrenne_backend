@@ -86,11 +86,13 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'storages',
+    'corsheaders',
 ]
 
 INSTALLED_APPS += ['dal', 'dal_select2']
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
